@@ -1,0 +1,76 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "no-null"
+  ],
+  "env": {
+    "es6": true,
+    "browser": true
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 2015,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "@typescript-eslint/no-use-before-define": [
+      2,
+      {
+        "classes": false,
+        "functions": false
+      }
+    ],
+    "@typescript-eslint/no-unused-vars": [
+      2,
+      {
+        "ignoreRestSiblings": true
+      }
+    ],
+    "@typescript-eslint/ban-ts-ignore": 0,
+    "@typescript-eslint/explicit-function-return-type": 0,
+    "@typescript-eslint/no-explicit-any": [
+      1,
+      {
+        "ignoreRestArgs": true
+      }
+    ],
+    "@typescript-eslint/prefer-for-of": 2,
+    "prefer-const": 2,
+    "no-multiple-empty-lines": 2,
+    "no-eval": 2,
+    "no-console": 1,
+    "eqeqeq": 2,
+    "one-var": [
+      2,
+      "never"
+    ],
+    "quote-props": 0,
+    "radix": 2,
+    "space-before-function-paren": 0,
+    "no-null/no-null": 2,
+    "react/prop-types": 0,
+    "react/display-name": 0,
+    "prefer-arrow-callback": [
+      2,
+      {
+        "allowNamedFunctions": true
+      }
+    ]
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}
+
