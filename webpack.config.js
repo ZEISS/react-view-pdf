@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
-const pkg = require('./package.json');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const env = process.env.NODE_ENV || 'development';
 const develop = env === 'development';
@@ -11,11 +11,6 @@ const production = env === 'production';
 const dist = path.join(__dirname, 'dist');
 
 const TerserPlugin = require('terser-webpack-plugin');
-
-function getFileName() {
-  const name = develop ? 'dev' : 'prod';
-  return `${name}.js`;
-}
 
 function getPlugins(plugins) {
   if (production) {
@@ -27,19 +22,10 @@ function getPlugins(plugins) {
 
 module.exports = {
   devtool: (develop || test) && 'source-map',
-
-  entry: './src/index',
-
-  devServer: {
-    contentBase: "./public",
-    hot: true
-  },
-
+  entry: './samples/index',
   output: {
     path: dist,
-    filename: getFileName(),
-    library: pkg.name,
-    libraryTarget: 'umd',
+    filename: 'bundle.js'
   },
 
 
@@ -54,23 +40,6 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.js$/,
-        include: /node_modules/,
-        exclude: /node_modules\/pdfjs-dist/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            cacheDirectory: true,
-            babelrc: false,
-            presets: [['@babel/preset-env', { targets: { browsers: 'last 2 versions' } }]],
-          },
-        },
-      },
-      {
-        test: /\.(png|svg|jpg|gif|woff|woff2|eot|ttf)$/,
-        use: 'base64-inline-loader'
-      },
       {
         test: /\.tsx?$/,
         loaders: [
@@ -90,18 +59,6 @@ module.exports = {
       },
     ],
   },
-
-  optimization: {
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          warnings: false,
-          ie8: true,
-        },
-      }),
-    ],
-  },
-
   plugins: getPlugins([
     new CircularDependencyPlugin({
       exclude: /node_modules/,
@@ -111,6 +68,9 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(env),
+    }),
+    new HtmlWebpackPlugin({
+      template: './public/index.html'
     }),
   ])
 };

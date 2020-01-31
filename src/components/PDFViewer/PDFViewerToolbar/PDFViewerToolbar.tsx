@@ -174,9 +174,7 @@ export const PDFViewerToolbar: React.FC<PDFViewerToolbarProps> = props => {
               onKeyDown={(e: KeyboardEvent) => e.key === 'Enter' && onPageNumberDefocused()}
             />
           ) : (
-            <span onClick={() => onPageNumberFocused()}>
-              {translate('pdfViewerPagesOf')}
-            </span>
+            <span onClick={() => onPageNumberFocused()}>{translate('pdfViewerPagesOf')}</span>
           )}
         </ToolbarItem>
         <ToolbarItem>
