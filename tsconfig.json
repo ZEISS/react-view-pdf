@@ -24,11 +24,13 @@
     "allowSyntheticDefaultImports": false
   },
   "include": [
-    "./src/**/*"
+    "./src/**/*",
+    "./samples/**/*",
   ],
   "exclude": [
     "node_modules",
     "**/*.test.tsx",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "webpack.config.js"
   ]
 }

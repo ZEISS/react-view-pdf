@@ -1,7 +1,0 @@
-src/
-.editorconfig
-.gitignore
-jest.config.js
-tsconfig.json
-test/
-*.tgz

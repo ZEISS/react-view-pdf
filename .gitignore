@@ -23,9 +23,6 @@ coverage
 # Build directory
 dist/
 
-# Helper directory for external zeisslet
-zeisslets/
-
 # Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
 

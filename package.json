@@ -1,7 +1,7 @@
 {
   "name": "react-view-pdf",
   "version": "0.0.1",
-  "description": "A simple....",
+  "description": "A simple and powerful PDF Viewer library for React.js",
   "homepage": "https://github.com/ZEISS/react-view-pdf",
   "author": {
     "name": "ZEISS Digital Innovation Partners"
@@ -9,7 +9,10 @@
   "types": "dist",
   "keywords": [
     "react",
-    "pdf-viewer"
+    "pdf-viewer",
+    "pdf reader",
+    "pdf viewer",
+    "pdf"
   ],
   "devDependencies": {
     "precise-ui": "^1.0.0",
@@ -45,10 +48,6 @@
     "fork-ts-checker-webpack-plugin": "^1.5.0",
     "html-webpack-plugin": "^3.2.0",
     "husky": "^1.2.0",
-    "jest": "^24.8.0",
-    "jest-cli": "^24.8.0",
-    "jest-enzyme": "^7.0.1",
-    "kras": "0.8.0",
     "prettier": "^1.18.2",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
@@ -66,23 +65,16 @@
   },
   "peerDependencies": {
     "precise-ui": "^1.0.0",
-    "@zeiss/pharos": "^0.7.1-rc241235",
-    "redux": "^3.7.2",
     "react": "^16.8.4",
     "styled-components": "^4.1.3"
   },
   "scripts": {
-    "start": "webpack-dev-server --eslint",
+    "start": "webpack-dev-server",
     "build": "cross-env NODE_ENV=production webpack -p",
-    "test": "npm run lint && npm run test:unit",
-    "test:unit": "cross-env NODE_ENV=test jest src",
-    "test:watch": "npm run test:unit -- --watch",
     "lint": "eslint -f \"node_modules/eslint-friendly-formatter\" \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint -f \"node_modules/eslint-friendly-formatter\" --fix \"src/**/*.{ts,tsx}\"",
-    "audit": "npm audit --registry=https://registry.npmjs.org",
-    "audit:fix": "npm audit fix --registry=https://registry.npmjs.org",
     "prettier": "prettier --config prettier.config.js --write \"src/**/*.{ts,tsx}\"",
-    "prepush": "npm run prettier && npm run test"
+    "prepush": "npm run prettier"
   },
   "license": "MIT",
   "dependencies": {
