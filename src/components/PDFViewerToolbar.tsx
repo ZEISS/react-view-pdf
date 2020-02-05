@@ -74,6 +74,32 @@ const ToolbarActionLink = styled(ActionLink)`
   }
 `;
 
+const defaultLabels = {
+  exitFullscreen: 'Exit Fullscreen',
+  enterFullscreen: 'Enter Fullscreen',
+  viewModeFitToHeight: 'Fit to Height',
+  viewModeFitToWidth: 'Fit to Width',
+  nextPage: 'Next',
+  prevPage: 'Previous',
+  zoomIn: 'Zoom In',
+  zoomOut: 'Zoom Out',
+  pagesOf: 'of',
+  page: 'Page',
+};
+
+export type ToolbarLabelProps = {
+  exitFullscreen?: string;
+  enterFullscreen?: string;
+  viewModeFitToWidth?: string;
+  viewModeFitToHeight?: string;
+  nextPage?: string;
+  prevPage?: string;
+  zoomIn?: string;
+  zoomOut?: string;
+  pagesOf?: string;
+  page?: string;
+};
+
 export interface PDFViewerToolbarProps {
   currentPage: number;
   currentViewMode: PageViewMode;
@@ -84,13 +110,14 @@ export interface PDFViewerToolbarProps {
   onScaleChange(pageNum: number): void;
   onViewModeChange(viewMode: PageViewMode): void;
   onFullscreenChange(): void;
+  labels?: ToolbarLabelProps;
 }
 
 /**
  * The `Document` is a wrapper to load PDFs and render all the pages
  */
 export const PDFViewerToolbar: React.FC<PDFViewerToolbarProps> = props => {
-  const translate = (text: string) => text;
+  const { labels = defaultLabels, fullscreen, onFullscreenChange, currentPage, currentScale } = props;
 
   const pageInputRef = React.useRef<HTMLInputElement>();
 
@@ -101,9 +128,7 @@ export const PDFViewerToolbar: React.FC<PDFViewerToolbarProps> = props => {
    * Returns the next view mode text to be used as tooltip
    */
   function getViewModeText() {
-    return translate(
-      `pdfViewerViewMode${toCamel(PageViewMode[props.currentViewMode >= 3 ? 0 : props.currentViewMode])}`,
-    );
+    return labels[`viewMode${toCamel(PageViewMode[props.currentViewMode >= 3 ? 0 : props.currentViewMode])}`];
   }
 
   /**
@@ -157,16 +182,14 @@ export const PDFViewerToolbar: React.FC<PDFViewerToolbarProps> = props => {
     <ToolbarWrapper>
       <Toolbar>
         <ToolbarItem>
-          <ToolbarTooltip content={translate('pdfViewerPrevPage')} position="top" offset={16}>
-            <ToolbarActionLink
-              onClick={() => props.onPageChange(props.currentPage - 1)}
-              disabled={props.currentPage <= 1}>
+          <ToolbarTooltip content={labels.prevPage} position="top" offset={16}>
+            <ToolbarActionLink onClick={() => props.onPageChange(currentPage - 1)} disabled={currentPage <= 1}>
               <Icon name="KeyboardArrowLeft" />
             </ToolbarActionLink>
           </ToolbarTooltip>
         </ToolbarItem>
         <ToolbarItem>
-          Page &nbsp;
+          {labels.page} &nbsp;
           {editingPageNumber ? (
             <ToolbarTextField
               ref={pageInputRef}
@@ -174,14 +197,14 @@ export const PDFViewerToolbar: React.FC<PDFViewerToolbarProps> = props => {
               onKeyDown={(e: KeyboardEvent) => e.key === 'Enter' && onPageNumberDefocused()}
             />
           ) : (
-            <span onClick={() => onPageNumberFocused()}>{translate('pdfViewerPagesOf')}</span>
+            <span onClick={() => onPageNumberFocused()}>{labels.pagesOf}</span>
           )}
         </ToolbarItem>
         <ToolbarItem>
-          <ToolbarTooltip content={translate('pdfViewerNextPage')} position="top" offset={16}>
+          <ToolbarTooltip content={labels.nextPage} position="top" offset={16}>
             <ToolbarActionLink
-              onClick={() => props.onPageChange(props.currentPage + 1)}
-              disabled={props.currentPage >= props.numPages}>
+              onClick={() => props.onPageChange(currentPage + 1)}
+              disabled={currentPage >= props.numPages}>
               <Icon name="KeyboardArrowRight" />
             </ToolbarActionLink>
           </ToolbarTooltip>
@@ -190,26 +213,26 @@ export const PDFViewerToolbar: React.FC<PDFViewerToolbarProps> = props => {
         <ToolbarSeparator />
 
         <ToolbarItem>
-          <ToolbarTooltip content={translate('pdfViewerZoomOut')} position="top" offset={16}>
+          <ToolbarTooltip content={labels.zoomOut} position="top" offset={16}>
             <ToolbarActionLink
               onClick={() => {
-                const scaleToPrev = Math.round((props.currentScale % 0.1) * 100) / 100;
-                props.onScaleChange(props.currentScale - (scaleToPrev === 0 ? 0.1 : scaleToPrev));
+                const scaleToPrev = Math.round((currentScale % 0.1) * 100) / 100;
+                props.onScaleChange(currentScale - (scaleToPrev === 0 ? 0.1 : scaleToPrev));
               }}
-              disabled={props.currentScale <= 0.5}>
+              disabled={currentScale <= 0.5}>
               <Icon name="Remove" />
             </ToolbarActionLink>
           </ToolbarTooltip>
         </ToolbarItem>
-        <ToolbarItem>{Math.round(props.currentScale * 100)}%</ToolbarItem>
+        <ToolbarItem>{Math.round(currentScale * 100)}%</ToolbarItem>
         <ToolbarItem>
-          <ToolbarTooltip content={translate('pdfViewerZoomIn')} position="top" offset={16}>
+          <ToolbarTooltip content={labels.zoomIn} position="top" offset={16}>
             <ToolbarActionLink
               onClick={() => {
-                const scaleToPrev = Math.round((props.currentScale % 0.1) * 100) / 100;
-                props.onScaleChange(props.currentScale + 0.1 - (scaleToPrev === 0.1 ? 0 : scaleToPrev));
+                const scaleToPrev = Math.round((currentScale % 0.1) * 100) / 100;
+                props.onScaleChange(currentScale + 0.1 - (scaleToPrev === 0.1 ? 0 : scaleToPrev));
               }}
-              disabled={props.currentScale >= 2.5}>
+              disabled={currentScale >= 2.5}>
               <Icon name="Add" />
             </ToolbarActionLink>
           </ToolbarTooltip>
@@ -226,12 +249,12 @@ export const PDFViewerToolbar: React.FC<PDFViewerToolbarProps> = props => {
               <>
                 <ToolbarDropdownListItem>
                   <ToolbarActionLink onClick={() => onViewModeChange(PageViewMode.FIT_TO_WIDTH)}>
-                    <Icon name="FitToWidth" /> {translate('pdfViewerViewModeFitToWidth')}
+                    <Icon name="FitToWidth" /> {labels.viewModeFitToWidth}
                   </ToolbarActionLink>
                 </ToolbarDropdownListItem>
                 <ToolbarDropdownListItem onClick={() => onViewModeChange(PageViewMode.FIT_TO_HEIGHT)}>
                   <ToolbarActionLink>
-                    <Icon name="FitToHeight" /> {translate('pdfViewerViewModeFitToHeight')}
+                    <Icon name="FitToHeight" /> {labels.viewModeFitToHeight}
                   </ToolbarActionLink>
                 </ToolbarDropdownListItem>
               </>
@@ -248,11 +271,11 @@ export const PDFViewerToolbar: React.FC<PDFViewerToolbarProps> = props => {
 
         <ToolbarItem>
           <ToolbarTooltip
-            content={translate(props.fullscreen ? 'pdfViewerFullscreenExit' : 'pdfViewerFullscreen')}
+            content={fullscreen ? labels.exitFullscreen : labels.enterFullscreen}
             position="top"
             offset={16}>
-            <ToolbarActionLink onClick={() => props.onFullscreenChange()}>
-              <Icon name={props.fullscreen ? 'FullscreenExit' : 'Fullscreen'} size="24px" />
+            <ToolbarActionLink onClick={onFullscreenChange}>
+              <Icon name={fullscreen ? 'FullscreenExit' : 'Fullscreen'} size="24px" />
             </ToolbarActionLink>
           </ToolbarTooltip>
         </ToolbarItem>

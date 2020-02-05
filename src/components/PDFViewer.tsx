@@ -4,7 +4,7 @@ import { getDocument, GlobalWorkerOptions, PDFDocumentProxy, version as PDFJSVer
 import { PDFViewerPage } from './PDFViewerPage';
 import { dataURItoUint8Array, isDataURI, throttle } from '../utils/hacks';
 import { PageType, PageViewMode } from '../types/pdfViewer';
-import { PDFViewerToolbar } from './PDFViewerToolbar';
+import { PDFViewerToolbar, ToolbarLabelProps } from './PDFViewerToolbar';
 
 GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJSVersion}/pdf.worker.js`;
 
@@ -77,6 +77,11 @@ export interface PDFViewerProps {
    * @param totalPages
    */
   onPageChanged?(currentPage: number, totalPages: number): void;
+
+  /**
+   * Optional object containing all labels used in the toolbar, in case localization is needed.
+   */
+  toolbarLabels?: ToolbarLabelProps;
 }
 
 /**
@@ -359,6 +364,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
       </Document>
       {!loading && (
         <PDFViewerToolbar
+          labels={props.toolbarLabels}
           currentPage={currentPage}
           currentViewMode={currentViewMode}
           numPages={pages.length}
