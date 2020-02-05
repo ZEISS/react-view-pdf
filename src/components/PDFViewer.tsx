@@ -82,6 +82,11 @@ export interface PDFViewerProps {
    * Optional object containing all labels used in the toolbar, in case localization is needed.
    */
   toolbarLabels?: ToolbarLabelProps;
+
+  /**
+   * Disable text selection for rendered pages
+   */
+  disableSelect?: boolean;
 }
 
 /**
@@ -352,6 +357,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
           pages.map((_, index: number) => (
             <PageWrapper ref={(ref: HTMLDivElement | null) => (pages[index].ref = ref)} key={index}>
               <PDFViewerPage
+                disableSelect={props.disableSelect}
                 document={document}
                 currentPage={currentPage}
                 pageNumber={index + 1}
