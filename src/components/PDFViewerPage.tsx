@@ -6,7 +6,7 @@ import { ExtendedPDFRenderTask } from '../types/pdfViewer';
 
 const Page = styled.div`
   margin-bottom: ${distance.xlarge};
-  user-select: none;
+  user-select: ${props => props.disableSelect && 'none'};
   display: block;
   background-color: ${themed(({ theme = {} }: StandardProps) => theme.ui1)};
   box-shadow: rgba(172, 181, 185, 0.4) 0 0 8px 0;
@@ -17,6 +17,7 @@ export interface PDFViewerPageProps {
   currentPage: number;
   pageNumber: number;
   scale: number;
+  disableSelect?: boolean;
 
   onPageLoaded(pageNum: number, pageWidth: number, pageHeight: number): void;
   onPageError?(pageNum: number, error: string): void;
@@ -83,6 +84,7 @@ export const PDFViewerPage: React.FC<PDFViewerPageProps> = props => {
 
   return (
     <Page
+      disableSelect={props.disableSelect}
       style={{
         width: loading && '70%',
         height: loading && '1200px',

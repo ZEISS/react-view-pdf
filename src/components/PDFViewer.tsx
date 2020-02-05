@@ -4,7 +4,7 @@ import PdfJs from '../utils/PdfJs';
 import { PDFViewerPage } from './PDFViewerPage';
 import { dataURItoUint8Array, isDataURI, throttle } from '../utils/hacks';
 import { PageType, PageViewMode } from '../types/pdfViewer';
-import { PDFViewerToolbar } from './PDFViewerToolbar';
+import { PDFViewerToolbar, ToolbarLabelProps } from './PDFViewerToolbar';
 import { PDFWorker } from './PDFWorker';
 
 interface FullscreenableElement {
@@ -81,6 +81,16 @@ export interface PDFViewerProps {
    * @param totalPages
    */
   onPageChanged?(currentPage: number, totalPages: number): void;
+
+  /**
+   * Optional object containing all labels used in the toolbar, in case localization is needed.
+   */
+  toolbarLabels?: ToolbarLabelProps;
+
+  /**
+   * Disable text selection for rendered pages
+   */
+  disableSelect?: boolean;
 }
 
 const defaultWorkerUrl = 'https://unpkg.com/pdfjs-dist@2.2.228/build/pdf.worker.min.js';
@@ -357,6 +367,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
             pages.map((_, index: number) => (
               <PageWrapper ref={(ref: HTMLDivElement | null) => (pages[index].ref = ref)} key={index}>
                 <PDFViewerPage
+                  disableSelect={props.disableSelect}
                   document={document}
                   currentPage={currentPage}
                   pageNumber={index + 1}
@@ -369,6 +380,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
         </Document>
         {!loading && (
           <PDFViewerToolbar
+            labels={props.toolbarLabels}
             currentPage={currentPage}
             currentViewMode={currentViewMode}
             numPages={pages.length}

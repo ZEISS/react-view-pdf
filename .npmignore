@@ -5,6 +5,7 @@ samples/
 .eslintrc.json
 .gitignore
 prettier.config.js
+.travis.yml
 tsconfig.json
 **/webpack.config.js
 *.tgz
