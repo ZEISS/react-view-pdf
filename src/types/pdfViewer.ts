@@ -1,4 +1,4 @@
-import { PDFRenderTask } from 'pdfjs-dist';
+import PdfJs from '../utils/PdfJs';
 
 export interface PageType {
   ref: HTMLDivElement | null;
@@ -22,6 +22,6 @@ export interface InternalRenderTask {
   graphicsReady: boolean;
 }
 
-export interface ExtendedPDFRenderTask extends PDFRenderTask {
+export interface ExtendedPDFRenderTask extends PdfJs.PDFRenderTask {
   _internalRenderTask: InternalRenderTask;
 }
