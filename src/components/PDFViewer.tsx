@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { debounce, distance, styled, themed, StandardProps } from 'precise-ui';
-import { getDocument, GlobalWorkerOptions, PDFDocumentProxy, version as PDFJSVersion } from 'pdfjs-dist';
+import PdfJs from '../utils/PdfJs';
 import { PDFViewerPage } from './PDFViewerPage';
 import { dataURItoUint8Array, isDataURI, throttle } from '../utils/hacks';
 import { PageType, PageViewMode } from '../types/pdfViewer';
 import { PDFViewerToolbar, ToolbarLabelProps } from './PDFViewerToolbar';
-
-GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJSVersion}/pdf.worker.js`;
+import { PDFWorker } from './PDFWorker';
 
 interface FullscreenableElement {
   fullscreen: boolean;
@@ -57,11 +56,16 @@ export interface PDFViewerProps {
   url?: string;
 
   /**
+   * Service workser URL
+   */
+  workerUrl?: string;
+
+  /**
    * Function event triggered when a document fully loads successfully
    *
    * @param document
    */
-  onLoadSuccess?(document: PDFDocumentProxy): void;
+  onLoadSuccess?(document: PdfJs.PDFDocumentProxy): void;
 
   /**
    * Function event triggered when a document fails to load
@@ -89,15 +93,17 @@ export interface PDFViewerProps {
   disableSelect?: boolean;
 }
 
+const defaultWorkerUrl = 'https://unpkg.com/pdfjs-dist@2.2.228/build/pdf.worker.min.js';
+
 /**
  * The `Document` is a wrapper to load PDFs and render all the pages
  */
 export const PDFViewer: React.FC<PDFViewerProps> = props => {
   const scrollToNewPageBuffer = 200;
 
-  const { url } = props;
+  const { url, workerUrl = defaultWorkerUrl } = props;
   const documentRef = React.useRef<HTMLDivElement>();
-  const [document, setDocument] = React.useState<PDFDocumentProxy>();
+  const [document, setDocument] = React.useState<PdfJs.PDFDocumentProxy>();
   const [loading, setLoading] = React.useState(true);
   const [pages, setPages] = React.useState<Array<PageType>>([]);
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -171,7 +177,10 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
     }
     try {
       const source = await findDocumentSource(url);
-      onLoadSuccess(await getDocument(source).promise);
+      console.time('[-] get document');
+      const d = await PdfJs.getDocument(source).promise;
+      console.timeEnd('[-] get document');
+      onLoadSuccess(d);
     } catch (error) {
       onLoadError(error);
     }
@@ -182,7 +191,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
    *
    * @param document
    */
-  function onLoadSuccess(document: PDFDocumentProxy) {
+  function onLoadSuccess(document: PdfJs.PDFDocumentProxy) {
     setDocument(document);
 
     if (props.onLoadSuccess) {
@@ -346,43 +355,45 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
   }
 
   return (
-    <DocumentWrapper fullscreen={fullscreen}>
-      <Document ref={documentRef}>
-        {loading ? (
-          <PageWrapper>
-            <PDFViewerPage currentPage={1} pageNumber={1} scale={1} onPageLoaded={onPageLoaded} />
-          </PageWrapper>
-        ) : (
-          document &&
-          pages.map((_, index: number) => (
-            <PageWrapper ref={(ref: HTMLDivElement | null) => (pages[index].ref = ref)} key={index}>
-              <PDFViewerPage
-                disableSelect={props.disableSelect}
-                document={document}
-                currentPage={currentPage}
-                pageNumber={index + 1}
-                scale={currentScale}
-                onPageLoaded={onPageLoaded}
-              />
+    <PDFWorker workerUrl={workerUrl}>
+      <DocumentWrapper fullscreen={fullscreen}>
+        <Document ref={documentRef}>
+          {loading ? (
+            <PageWrapper>
+              <PDFViewerPage currentPage={1} pageNumber={1} scale={1} onPageLoaded={onPageLoaded} />
             </PageWrapper>
-          ))
+          ) : (
+            document &&
+            pages.map((_, index: number) => (
+              <PageWrapper ref={(ref: HTMLDivElement | null) => (pages[index].ref = ref)} key={index}>
+                <PDFViewerPage
+                  disableSelect={props.disableSelect}
+                  document={document}
+                  currentPage={currentPage}
+                  pageNumber={index + 1}
+                  scale={currentScale}
+                  onPageLoaded={onPageLoaded}
+                />
+              </PageWrapper>
+            ))
+          )}
+        </Document>
+        {!loading && (
+          <PDFViewerToolbar
+            labels={props.toolbarLabels}
+            currentPage={currentPage}
+            currentViewMode={currentViewMode}
+            numPages={pages.length}
+            currentScale={currentScale}
+            fullscreen={fullscreen}
+            onPageChange={navigateToPage}
+            onScaleChange={onScaleChange}
+            onViewModeChange={onViewModeChange}
+            onFullscreenChange={switchFullscreenMode}
+          />
         )}
-      </Document>
-      {!loading && (
-        <PDFViewerToolbar
-          labels={props.toolbarLabels}
-          currentPage={currentPage}
-          currentViewMode={currentViewMode}
-          numPages={pages.length}
-          currentScale={currentScale}
-          fullscreen={fullscreen}
-          onPageChange={navigateToPage}
-          onScaleChange={onScaleChange}
-          onViewModeChange={onViewModeChange}
-          onFullscreenChange={switchFullscreenMode}
-        />
-      )}
-    </DocumentWrapper>
+      </DocumentWrapper>
+    </PDFWorker>
   );
 };
 
