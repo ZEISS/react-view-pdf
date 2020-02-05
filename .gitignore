@@ -22,6 +22,9 @@ coverage
 
 # Build directory
 dist/
+lib
+lib-esm
+_bundles
 
 # Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
 .grunt

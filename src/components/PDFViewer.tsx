@@ -2,8 +2,8 @@ import * as React from 'react';
 import { debounce, distance, styled, themed, StandardProps } from 'precise-ui';
 import { getDocument, GlobalWorkerOptions, PDFDocumentProxy, version as PDFJSVersion } from 'pdfjs-dist';
 import { PDFViewerPage } from './PDFViewerPage';
-import { dataURItoUint8Array, isDataURI, throttle } from '../../utils/hacks';
-import { PageType, PageViewMode } from '../../types/pdfViewer';
+import { dataURItoUint8Array, isDataURI, throttle } from '../utils/hacks';
+import { PageType, PageViewMode } from '../types/pdfViewer';
 import { PDFViewerToolbar } from './PDFViewerToolbar';
 
 GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJSVersion}/pdf.worker.js`;

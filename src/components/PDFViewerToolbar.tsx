@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ActionLink, distance, Flyout, Icon, styled, themed, Tooltip, StandardProps, AnchorProps } from 'precise-ui';
-import { PageViewMode } from '../../../types/pdfViewer';
-import { toCamel } from '../../../utils/hacks';
+import { PageViewMode } from '../types/pdfViewer';
+import { toCamel } from '../utils/hacks';
 
 const Toolbar = styled.ul`
   background-color: ${themed(({ theme = {} }: StandardProps) => theme.ui5)};

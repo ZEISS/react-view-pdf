@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { styled, themed, distance, Skeleton, StandardProps } from 'precise-ui';
 import { PDFDocumentProxy, PDFPageProxy, PDFPageViewport } from 'pdfjs-dist';
-import { range } from '../../../utils/hacks';
-import { ExtendedPDFRenderTask } from '../../../types/pdfViewer';
+import { range } from '../utils/hacks';
+import { ExtendedPDFRenderTask } from '../types/pdfViewer';
 
 const Page = styled.div`
   margin-bottom: ${distance.xlarge};
