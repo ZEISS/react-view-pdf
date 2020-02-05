@@ -18,7 +18,14 @@ module.exports = {
   },
 
   optimization: {
-    minimizer: [new TerserPlugin({ terserOptions: { warnings: false, ie8: true } })],
+    minimize: true,
+    minimizer: [new TerserPlugin()],
+  },
+
+  externals: {
+    react: 'react',
+    "precise-ui": "precise-ui",
+    "styled-components": "styled-components",
   },
 
   module: {
