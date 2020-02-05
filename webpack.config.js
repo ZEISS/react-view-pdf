@@ -4,7 +4,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 module.exports = {
   devtool: 'source-map',
   entry: {
-    'react-view-pdf': './src/index.ts',
+    'index': './src/index.ts',
   },
   output: {
     path: path.join(__dirname, 'lib'),
