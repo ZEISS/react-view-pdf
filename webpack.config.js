@@ -1,16 +1,14 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
   devtool: 'source-map',
   entry: {
     'react-view-pdf': './src/index.ts',
-    'react-view-pdf.min': './src/index.ts'
   },
   output: {
     path: path.join(__dirname, 'lib'),
-    filename: 'index.js',
+    filename: '[name].js',
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
@@ -45,7 +43,4 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    new HtmlWebpackPlugin({ template: './public/index.html' }),
-  ],
 };
