@@ -83,7 +83,7 @@ const defaultLabels = {
   prevPage: 'Previous',
   zoomIn: 'Zoom In',
   zoomOut: 'Zoom Out',
-  pagesOf: 'of',
+  pagesOf: (current, total) => `Page ${current} of ${total}`,
   page: 'Page',
 };
 
@@ -96,7 +96,19 @@ export type ToolbarLabelProps = {
   prevPage?: string;
   zoomIn?: string;
   zoomOut?: string;
-  pagesOf?: string;
+  /**
+   * Function that receives the current and total pages and returns a string with translations for number of pages
+   * Example: 'Page 5 of 9' where 5 is the current page and 9 is the total.
+   *
+   * @param currentPage
+   * @param totalPages
+   */
+  pagesOf?(currentPage: number, totalPages: number): string;
+  /**
+   * Used as a prefix when editing the current page.
+   * Example: 'Page ____.'
+   *
+   */
   page?: string;
 };
 
@@ -189,15 +201,17 @@ export const PDFViewerToolbar: React.FC<PDFViewerToolbarProps> = props => {
           </ToolbarTooltip>
         </ToolbarItem>
         <ToolbarItem>
-          {labels.page} &nbsp;
           {editingPageNumber ? (
-            <ToolbarTextField
-              ref={pageInputRef}
-              onBlur={onPageNumberDefocused}
-              onKeyDown={(e: KeyboardEvent) => e.key === 'Enter' && onPageNumberDefocused()}
-            />
+            <>
+              {labels.page} &nbsp;
+              <ToolbarTextField
+                ref={pageInputRef}
+                onBlur={onPageNumberDefocused}
+                onKeyDown={(e: KeyboardEvent) => e.key === 'Enter' && onPageNumberDefocused()}
+              />
+            </>
           ) : (
-            <span onClick={() => onPageNumberFocused()}>{labels.pagesOf}</span>
+            <span onClick={onPageNumberFocused}>{labels.pagesOf(currentPage, props.numPages)}</span>
           )}
         </ToolbarItem>
         <ToolbarItem>
