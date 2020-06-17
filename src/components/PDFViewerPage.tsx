@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { styled, themed, distance, Skeleton, StandardProps } from 'precise-ui';
+import { useDebouncedCallback } from 'use-debounce';
 import { PDFDocumentProxy, PDFPageProxy, PDFPageViewport } from 'pdfjs-dist';
 import { range } from '../utils/hacks';
 import { ExtendedPDFRenderTask } from '../types/pdfViewer';
@@ -34,6 +35,8 @@ export const PDFViewerPage: React.FC<PDFViewerPageProps> = props => {
   const [renderTask, setRenderTask] = React.useState<ExtendedPDFRenderTask>();
   const [canvasContext, setCanvasContext] = React.useState<CanvasRenderingContext2D | null>();
 
+  const [debouncedRender] = useDebouncedCallback(() => renderPage(), 500);
+
   React.useEffect(() => {
     if (document) {
       document.getPage(pageNumber).then(page => {
@@ -47,12 +50,12 @@ export const PDFViewerPage: React.FC<PDFViewerPageProps> = props => {
 
   React.useEffect(() => {
     // If loading, make sure only the first 2 pages triggers the rendering
-    (loading && pageNumber > 2) || renderPage();
+    (loading && pageNumber > 2) || debouncedRender();
   }, [canvasContext, scale, page]);
 
   React.useEffect(() => {
     if (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1 && loading) {
-      renderPage();
+      debouncedRender();
     }
   }, [currentPage]);
 
