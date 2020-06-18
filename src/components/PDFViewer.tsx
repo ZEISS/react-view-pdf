@@ -93,7 +93,7 @@ export interface PDFViewerProps {
   disableSelect?: boolean;
 }
 
-const defaultWorkerUrl = 'https://unpkg.com/pdfjs-dist@2.2.228/build/pdf.worker.min.js';
+const defaultWorkerUrl = 'https://unpkg.com/pdfjs-dist@2.4.456/build/pdf.worker.min.js';
 
 /**
  * The `Document` is a wrapper to load PDFs and render all the pages

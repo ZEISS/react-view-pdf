@@ -1,5 +1,9 @@
 # React PDF Viewer Component
 
+## 0.0.5
+
+- Update PDF library to improve performance and bug fixes 
+
 ## 0.0.4
 
 - Fix issue when the image rotated after scaling
