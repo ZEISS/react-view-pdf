@@ -178,7 +178,8 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
     try {
       const source = await findDocumentSource(url);
       console.time('[-] get document');
-      const d = await PdfJs.getDocument(source).promise;
+      console.log('worker', PdfJs.GlobalWorkerOptions.workerSrc);
+      const d = await PdfJs.getDocument({ ...source, verbosity: 5 }).promise;
       console.timeEnd('[-] get document');
       onLoadSuccess(d);
     } catch (error) {

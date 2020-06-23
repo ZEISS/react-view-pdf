@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { styled, themed, distance, Skeleton, StandardProps } from 'precise-ui';
 import { useDebouncedCallback } from 'use-debounce';
-import { PDFDocumentProxy, PDFPageProxy, PDFPageViewport } from 'pdfjs-dist';
+import PdfJs from '../utils/PdfJs';
 import { range } from '../utils/hacks';
 import { ExtendedPDFRenderTask } from '../types/pdfViewer';
 
@@ -14,7 +14,7 @@ const Page = styled.div`
 `;
 
 export interface PDFViewerPageProps {
-  document?: PDFDocumentProxy;
+  document?: PdfJs.PDFDocumentProxy;
   currentPage: number;
   pageNumber: number;
   scale: number;
@@ -29,16 +29,31 @@ export interface PDFViewerPageProps {
  */
 export const PDFViewerPage: React.FC<PDFViewerPageProps> = props => {
   const { document, currentPage, pageNumber, scale } = props;
-  const [page, setPage] = React.useState<PDFPageProxy>();
-  const [viewport, setViewport] = React.useState<PDFPageViewport>();
+  const [page, setPage] = React.useState<PdfJs.PDFPageProxy>();
+  const [viewport, setViewport] = React.useState<PdfJs.PDFPageViewport>();
   const [loading, setLoading] = React.useState(true);
   const [renderTask, setRenderTask] = React.useState<ExtendedPDFRenderTask>();
   const [canvasContext, setCanvasContext] = React.useState<CanvasRenderingContext2D | null>();
 
-  const [debouncedRender] = useDebouncedCallback(() => renderPage(), 500);
+  const [debouncedRender] = useDebouncedCallback(() => renderPage(), 300);
+  const [debouncedLoad] = useDebouncedCallback(() => loadPage(), 300);
 
   React.useEffect(() => {
-    if (document) {
+    debouncedRender();
+  }, [canvasContext, page]);
+
+  React.useEffect(() => {
+    debouncedRender();
+  }, [scale]);
+
+  React.useEffect(() => {
+    if (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 2 && loading) {
+      debouncedLoad();
+    }
+  }, [currentPage]);
+
+  function loadPage() {
+    if (document && !page) {
       document.getPage(pageNumber).then(page => {
         const viewport = page.getViewport({ scale });
         setViewport(viewport);
@@ -46,18 +61,7 @@ export const PDFViewerPage: React.FC<PDFViewerPageProps> = props => {
         props.onPageLoaded(pageNumber, viewport.width, viewport.height);
       });
     }
-  }, [document]);
-
-  React.useEffect(() => {
-    // If loading, make sure only the first 2 pages triggers the rendering
-    (loading && pageNumber > 2) || debouncedRender();
-  }, [canvasContext, scale, page]);
-
-  React.useEffect(() => {
-    if (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1 && loading) {
-      debouncedRender();
-    }
-  }, [currentPage]);
+  }
 
   function renderPage() {
     if (page && canvasContext) {
