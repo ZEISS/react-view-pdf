@@ -1,5 +1,10 @@
 # React PDF Viewer Component
 
+## 0.0.6
+
+- Fix PDF performance for files with 100+ pages
+
+
 ## 0.0.5
 
 - Update PDF library to improve performance and bug fixes 
