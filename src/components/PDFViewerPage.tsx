@@ -3,7 +3,7 @@ import { styled, themed, distance, Skeleton, StandardProps } from 'precise-ui';
 import { useDebouncedCallback } from 'use-debounce';
 import PdfJs from '../utils/PdfJs';
 import { range } from '../utils/hacks';
-import { ExtendedPDFRenderTask } from '../types/pdfViewer';
+import Observer, { VisibilityChanged } from './Observer';
 
 const Page = styled.div`
   margin-bottom: ${distance.xlarge};
@@ -14,123 +14,138 @@ const Page = styled.div`
 `;
 
 export interface PDFViewerPageProps {
-  document?: PdfJs.PDFDocumentProxy;
-  currentPage: number;
+  document?: PdfJs.PdfDocument;
   pageNumber: number;
   scale: number;
   disableSelect?: boolean;
-
-  onPageLoaded(pageNum: number, pageWidth: number, pageHeight: number): void;
-  onPageError?(pageNum: number, error: string): void;
+  loaded: boolean;
+  onPageVisibilityChanged(pageIndex: number, ratio: number): void;
+  onPageLoaded(pageNumber): void;
 }
 
 /**
  * The `Document` is a wrapper to load PDFs and render all the pages
  */
-export const PDFViewerPage: React.FC<PDFViewerPageProps> = props => {
-  const { document, currentPage, pageNumber, scale } = props;
-  const [page, setPage] = React.useState<PdfJs.PDFPageProxy>();
-  const [viewport, setViewport] = React.useState<PdfJs.PDFPageViewport>();
-  const [loading, setLoading] = React.useState(true);
-  const [renderTask, setRenderTask] = React.useState<ExtendedPDFRenderTask>();
-  const [canvasContext, setCanvasContext] = React.useState<CanvasRenderingContext2D | null>();
+const PDFViewerPageInner: React.FC<PDFViewerPageProps> = props => {
+  const { document, pageNumber, scale, onPageVisibilityChanged, onPageLoaded, loaded } = props;
+  const [page, setPage] = React.useState<PdfJs.Page>();
+  const [isCalculated, setIsCalculated] = React.useState(false);
+  const canvasRef = React.createRef<HTMLCanvasElement>();
+  const renderTask = React.useRef<PdfJs.PageRenderTask>();
 
-  const [debouncedRender] = useDebouncedCallback(() => renderPage(), 300);
-  const [debouncedLoad] = useDebouncedCallback(() => loadPage(), 300);
+  const [debouncedLoad] = useDebouncedCallback(() => loadPage(), 100, { leading: true });
+  const [debouncedRender] = useDebouncedCallback(() => renderPage(), 100, { leading: true });
+
+  const intersectionThreshold = Array(10)
+    .fill(undefined)
+    .map((_, i) => i / 10);
 
   React.useEffect(() => {
     debouncedRender();
-  }, [canvasContext, page]);
-
-  React.useEffect(() => {
-    debouncedRender();
-  }, [scale]);
-
-  React.useEffect(() => {
-    if (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 2 && loading) {
-      debouncedLoad();
-    }
-  }, [currentPage]);
+  }, [page, scale]);
 
   function loadPage() {
-    if (document && !page) {
+    if (document && !page && !isCalculated) {
+      setIsCalculated(true);
       document.getPage(pageNumber).then(page => {
-        const viewport = page.getViewport({ scale });
-        setViewport(viewport);
+        onPageLoaded(pageNumber);
         setPage(page);
-        props.onPageLoaded(pageNumber, viewport.width, viewport.height);
       });
     }
   }
 
   function renderPage() {
-    if (page && canvasContext) {
-      if (renderTask && !renderTask._internalRenderTask.running) {
-        renderTask.cancel();
+    if (page) {
+      const task = renderTask.current;
+
+      if (task) {
+        task.cancel();
       }
 
+      const canvasEle = canvasRef.current as HTMLCanvasElement;
+      if (!canvasEle) {
+        return;
+      }
       const viewport = page.getViewport({ scale });
-      setViewport(viewport);
+      canvasEle.height = viewport.height;
+      canvasEle.width = viewport.width;
 
-      const renderContext = {
+      const canvasContext = canvasEle.getContext('2d', { alpha: false }) as CanvasRenderingContext2D;
+
+      renderTask.current = page.render({
         canvasContext,
         viewport,
-      };
-      const _renderTask = page.render(renderContext);
-      setRenderTask(_renderTask as ExtendedPDFRenderTask);
-      _renderTask.promise.then(
-        () => {
-          setLoading(false);
-        },
+      });
+      renderTask.current.promise.then(
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        () => {},
         error => {
-          props.onPageError && props.onPageError(pageNumber, error);
+          console.error('There was an error loading the PDF Page', pageNumber, error);
         },
       );
     }
+  }
+
+  function visibilityChanged(params: VisibilityChanged) {
+    const ratio = params.isVisible ? params.ratio : 0;
+    if (params.isVisible) {
+      debouncedLoad();
+    }
+    onPageVisibilityChanged(pageNumber, ratio);
   }
 
   return (
     <Page
       disableSelect={props.disableSelect}
       style={{
-        width: loading && '70%',
-        height: loading && '1200px',
-        padding: loading && distance.large,
+        width: !loaded && '70%',
+        height: !loaded && '1200px',
+        padding: !loaded && distance.large,
       }}>
-      {loading && (
-        <>
-          <Skeleton width="30%" height="3em" />
-          <br />
-          <br />
-          {range(5).map(index => (
-            <React.Fragment key={index}>
-              <Skeleton width="80%" height="1em" />
-              <br />
-              <Skeleton width="70%" height="1em" />
-              <br />
-              <Skeleton width="85%" height="1em" />
-              <br />
-              <Skeleton width="60%" height="1em" />
-              <br />
-              <Skeleton width="80%" height="1em" />
-              <br />
-              <Skeleton width="25%" height="1em" />
-              <br />
-              <Skeleton width="60%" height="1em" />
-              <br />
-              <Skeleton width="38%" height="1em" />
-              <br />
-              <Skeleton width="50%" height="1em" />
-              <br />
-            </React.Fragment>
-          ))}
-        </>
-      )}
-      <canvas
-        ref={(ref: HTMLCanvasElement) => ref && setCanvasContext(ref.getContext('2d'))}
-        width={viewport && viewport.width}
-        height={viewport && viewport.height}
-      />
+      <Observer onVisibilityChanged={visibilityChanged} threshold={intersectionThreshold}>
+        {!loaded && (
+          <>
+            <Skeleton width="30%" height="3em" />
+            <br />
+            <br />
+            {range(5).map(index => (
+              <React.Fragment key={index}>
+                <Skeleton width="80%" height="1em" />
+                <br />
+                <Skeleton width="70%" height="1em" />
+                <br />
+                <Skeleton width="85%" height="1em" />
+                <br />
+                <Skeleton width="60%" height="1em" />
+                <br />
+                <Skeleton width="80%" height="1em" />
+                <br />
+                <Skeleton width="25%" height="1em" />
+                <br />
+                <Skeleton width="60%" height="1em" />
+                <br />
+                <Skeleton width="38%" height="1em" />
+                <br />
+                <Skeleton width="50%" height="1em" />
+                <br />
+              </React.Fragment>
+            ))}
+          </>
+        )}
+        <canvas ref={canvasRef} />
+      </Observer>
     </Page>
   );
 };
+
+function areEqual(prevProps: PDFViewerPageProps, nextProps: PDFViewerPageProps) {
+  return (
+    prevProps.pageNumber === nextProps.pageNumber &&
+    prevProps.disableSelect === nextProps.disableSelect &&
+    prevProps.document === nextProps.document &&
+    prevProps.loaded === nextProps.loaded &&
+    (!nextProps.loaded || prevProps.scale === nextProps.scale) // if it's loading ignore the scale
+  );
+}
+
+export const PDFViewerPage = React.memo(PDFViewerPageInner, areEqual);

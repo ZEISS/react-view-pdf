@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { debounce, distance, styled, themed, StandardProps } from 'precise-ui';
 import PdfJs from '../utils/PdfJs';
+import { PageViewMode, PageType } from '../types/Page';
 import { PDFViewerPage } from './PDFViewerPage';
-import { dataURItoUint8Array, isDataURI, throttle } from '../utils/hacks';
-import { PageType, PageViewMode } from '../types/pdfViewer';
+import { dataURItoUint8Array, isDataURI } from '../utils/hacks';
 import { PDFViewerToolbar, ToolbarLabelProps } from './PDFViewerToolbar';
 import { PDFWorker } from './PDFWorker';
 
@@ -65,7 +65,7 @@ export interface PDFViewerProps {
    *
    * @param document
    */
-  onLoadSuccess?(document: PdfJs.PDFDocumentProxy): void;
+  onLoadSuccess?(document: PdfJs.PdfDocument): void;
 
   /**
    * Function event triggered when a document fails to load
@@ -99,11 +99,9 @@ const defaultWorkerUrl = 'https://unpkg.com/pdfjs-dist@2.4.456/build/pdf.worker.
  * The `Document` is a wrapper to load PDFs and render all the pages
  */
 export const PDFViewer: React.FC<PDFViewerProps> = props => {
-  const scrollToNewPageBuffer = 200;
-
   const { url, workerUrl = defaultWorkerUrl } = props;
   const documentRef = React.useRef<HTMLDivElement>();
-  const [document, setDocument] = React.useState<PdfJs.PDFDocumentProxy>();
+  const [document, setDocument] = React.useState<PdfJs.PdfDocument>();
   const [loading, setLoading] = React.useState(true);
   const [pages, setPages] = React.useState<Array<PageType>>([]);
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -117,17 +115,6 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
   React.useEffect(() => {
     loadDocument();
   }, [url]);
-
-  /**
-   * Effect responsible for registering/unregistering the scroll spy to determine the current page
-   */
-  React.useEffect(() => {
-    const handleScroll = throttle(detectCurrentPage, 500);
-    documentRef.current && documentRef.current.addEventListener('scroll', handleScroll);
-    return () => {
-      documentRef.current && documentRef.current.removeEventListener('scroll', handleScroll);
-    };
-  }, [pages]);
 
   /**
    * Effect to re-calculate page size and re-render after entering / exiting fullscreen
@@ -177,10 +164,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
     }
     try {
       const source = await findDocumentSource(url);
-      console.time('[-] get document');
-      console.log('worker', PdfJs.GlobalWorkerOptions.workerSrc);
-      const d = await PdfJs.getDocument({ ...source, verbosity: 5 }).promise;
-      console.timeEnd('[-] get document');
+      const d = await PdfJs.getDocument(source).promise;
       onLoadSuccess(d);
     } catch (error) {
       onLoadError(error);
@@ -192,21 +176,19 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
    *
    * @param document
    */
-  function onLoadSuccess(document: PdfJs.PDFDocumentProxy) {
+  function onLoadSuccess(document: PdfJs.PdfDocument) {
     setDocument(document);
 
     if (props.onLoadSuccess) {
       props.onLoadSuccess(document);
     }
 
-    const _pages = new Array(document.numPages).fill(undefined).map(() => {
+    const _pages = new Array(document.numPages).fill(0).map(() => {
       return {
+        ratio: 0,
         loaded: false,
-        rendered: false,
-        landscape: false,
       } as PageType;
     });
-
     setPages(_pages);
     setLoading(false);
   }
@@ -228,27 +210,34 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
   }
 
   /**
-   * Event triggered when a page finishes loading
+   * Event triggered when a page visibility changes
    *
-   * @param pageNum
-   * @param pageWidth
-   * @param pageHeight
+   * @param pageNumber
+   * @param ratio
    */
-  function onPageLoaded(pageNum: number, pageWidth: number, pageHeight: number) {
-    const page = pages[pageNum - 1];
-    page.loaded = true;
-    page.rendered = false;
-    page.width = pageWidth;
-    page.height = pageHeight;
-    page.landscape = pageWidth > pageHeight;
-
-    setPages([...pages].map((_page, index) => (index === pageNum - 1 ? page : _page)));
-
-    // On the first time we default the view to the first page
-    if (pageNum === 1) {
-      zoomToPageView(page, currentViewMode);
+  const onPageVisibilityChanged = (pageNumber: number, ratio: number): void => {
+    if (pages && pages.length) {
+      pages[pageNumber - 1].ratio = ratio;
+      const maxRatioPage = pages.reduce((maxIndex, item, index, array) => {
+        return item.ratio > array[maxIndex].ratio ? index : maxIndex;
+      }, 0);
+      setCurrentPage(maxRatioPage + 1);
+    } else {
+      setCurrentPage(1);
     }
-  }
+  };
+
+  /**
+   * Event triggered when a page loaded
+   *
+   * @param pageNumber
+   */
+  const onPageLoaded = (pageNumber: number): void => {
+    if (pages && pages.length) {
+      pages[pageNumber - 1].loaded = true;
+      setPages([...pages]);
+    }
+  };
 
   /**
    * Event triggered when the user manually changes the zoom level
@@ -257,25 +246,6 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
   function onScaleChange(scale: number) {
     setCurrentViewMode(PageViewMode.DEFAULT);
     zoomToScale(scale);
-  }
-
-  /**
-   * Detects the current position of the scroll and matches it with the page number
-   */
-  function detectCurrentPage(e: Event) {
-    const scrollTop = (e.target as HTMLDivElement).scrollTop;
-    const currentOnViewPage = [...pages].reverse().some((page, index) => {
-      if (page.ref && page.ref.offsetTop < scrollTop + scrollToNewPageBuffer) {
-        setCurrentPage(pages.length - index);
-        return true;
-      }
-
-      return false;
-    });
-
-    if (!currentOnViewPage) {
-      setCurrentPage(1);
-    }
   }
 
   /**
@@ -310,29 +280,33 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
    * @param viewMode
    */
   function zoomToPageView(pageProps: PageType, viewMode: PageViewMode) {
-    if (!documentRef.current || !pageProps || !pageProps.width || !pageProps.height || loading || !pageProps.loaded) {
+    if (!documentRef.current || !pageProps || !pageProps.ref) {
       return;
     }
 
+    const pageWidth = pageProps.ref.offsetWidth;
+    const pageHeight = pageProps.ref.offsetHeight;
+    const landscape = pageWidth > pageHeight;
+
     switch (viewMode) {
       case PageViewMode.DEFAULT: {
-        if (pageProps.landscape) {
+        if (landscape) {
           const desiredWidth = Math.round(documentRef.current.offsetWidth * 0.9);
-          zoomToScale(desiredWidth / pageProps.width);
+          zoomToScale(desiredWidth / pageWidth);
         } else {
           const desiredWidth = Math.round(documentRef.current.offsetWidth * 0.7);
-          zoomToScale(desiredWidth / pageProps.width);
+          zoomToScale(desiredWidth / pageWidth);
         }
         break;
       }
       case PageViewMode.FIT_TO_WIDTH: {
         const desiredWidth = Math.round(documentRef.current.offsetWidth * 0.95);
-        zoomToScale(desiredWidth / pageProps.width);
+        zoomToScale(desiredWidth / pageWidth);
         break;
       }
       case PageViewMode.FIT_TO_HEIGHT: {
         const desiredHeight = Math.round(documentRef.current.offsetHeight * 0.95);
-        zoomToScale(desiredHeight / pageProps.height);
+        zoomToScale(desiredHeight / pageHeight);
         break;
       }
       default:
@@ -361,19 +335,26 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
         <Document ref={documentRef}>
           {loading ? (
             <PageWrapper>
-              <PDFViewerPage currentPage={1} pageNumber={1} scale={1} onPageLoaded={onPageLoaded} />
+              <PDFViewerPage
+                onPageLoaded={onPageLoaded}
+                onPageVisibilityChanged={onPageVisibilityChanged}
+                pageNumber={1}
+                loaded={false}
+                scale={1}
+              />
             </PageWrapper>
           ) : (
             document &&
             pages.map((_, index: number) => (
               <PageWrapper ref={(ref: HTMLDivElement | null) => (pages[index].ref = ref)} key={index}>
                 <PDFViewerPage
+                  onPageLoaded={onPageLoaded}
+                  onPageVisibilityChanged={onPageVisibilityChanged}
                   disableSelect={props.disableSelect}
                   document={document}
-                  currentPage={currentPage}
+                  loaded={pages[index].loaded}
                   pageNumber={index + 1}
                   scale={currentScale}
-                  onPageLoaded={onPageLoaded}
                 />
               </PageWrapper>
             ))
