@@ -231,10 +231,17 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
    * Event triggered when a page loaded
    *
    * @param pageNumber
+   * @param width
+   * @param height
    */
-  const onPageLoaded = (pageNumber: number): void => {
+  const onPageLoaded = (pageNumber: number, width: number, height: number): void => {
     if (pages && pages.length) {
-      pages[pageNumber - 1].loaded = true;
+      pages[pageNumber - 1] = {
+        ...pages[pageNumber - 1],
+        loaded: true,
+        width,
+        height,
+      };
       setPages([...pages]);
     }
   };
@@ -284,8 +291,9 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
       return;
     }
 
-    const pageWidth = pageProps.ref.offsetWidth;
-    const pageHeight = pageProps.ref.offsetHeight;
+    const pageElement = pageProps.ref.firstChild as HTMLDivElement;
+    const pageWidth = pageProps.width || pageElement.offsetWidth;
+    const pageHeight = pageProps.height || pageElement.offsetHeight;
     const landscape = pageWidth > pageHeight;
 
     switch (viewMode) {
@@ -301,6 +309,8 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
       }
       case PageViewMode.FIT_TO_WIDTH: {
         const desiredWidth = Math.round(documentRef.current.offsetWidth * 0.95);
+        // eslint-disable-next-line no-debugger
+        debugger;
         zoomToScale(desiredWidth / pageWidth);
         break;
       }

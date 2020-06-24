@@ -1,5 +1,9 @@
 # React PDF Viewer Component
 
+## 0.0.8
+
+- Fix zoom to page width / height
+
 ## 0.0.7
 
 - Even better performance with some major rewrites

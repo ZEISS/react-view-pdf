@@ -20,7 +20,7 @@ export interface PDFViewerPageProps {
   disableSelect?: boolean;
   loaded: boolean;
   onPageVisibilityChanged(pageIndex: number, ratio: number): void;
-  onPageLoaded(pageNumber): void;
+  onPageLoaded(pageNumber: number, width: number, height: number): void;
 }
 
 /**
@@ -48,7 +48,8 @@ const PDFViewerPageInner: React.FC<PDFViewerPageProps> = props => {
     if (document && !page && !isCalculated) {
       setIsCalculated(true);
       document.getPage(pageNumber).then(page => {
-        onPageLoaded(pageNumber);
+        const viewport = page.getViewport({ scale: 1 });
+        onPageLoaded(pageNumber, viewport.width, viewport.height);
         setPage(page);
       });
     }
@@ -79,9 +80,8 @@ const PDFViewerPageInner: React.FC<PDFViewerPageProps> = props => {
       renderTask.current.promise.then(
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         () => {},
-        error => {
-          console.error('There was an error loading the PDF Page', pageNumber, error);
-        },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        () => {},
       );
     }
   }

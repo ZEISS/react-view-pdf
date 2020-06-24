@@ -8,4 +8,6 @@ export interface PageType {
   ref: HTMLDivElement | null;
   ratio: number;
   loaded: boolean;
+  width?: number;
+  height?: number;
 }
