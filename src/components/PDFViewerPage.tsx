@@ -36,9 +36,7 @@ const PDFViewerPageInner: React.FC<PDFViewerPageProps> = props => {
   const [debouncedLoad] = useDebouncedCallback(() => loadPage(), 100, { leading: true });
   const [debouncedRender] = useDebouncedCallback(() => renderPage(), 100, { leading: true });
 
-  const intersectionThreshold = Array(10)
-    .fill(undefined)
-    .map((_, i) => i / 10);
+  const intersectionThreshold = [...Array(10)].map((_, i) => i / 10);
 
   React.useEffect(() => {
     debouncedRender();

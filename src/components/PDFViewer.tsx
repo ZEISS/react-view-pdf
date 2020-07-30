@@ -183,7 +183,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
       props.onLoadSuccess(document);
     }
 
-    const _pages = new Array(document.numPages).fill(0).map(() => {
+    const _pages = [...new Array(document.numPages)].map(() => {
       return {
         ratio: 0,
         loaded: false,

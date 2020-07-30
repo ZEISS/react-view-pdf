@@ -1,5 +1,9 @@
 # React PDF Viewer Component
 
+## 0.0.9
+
+- Fix for IE
+
 ## 0.0.8
 
 - Fix zoom to page width / height
