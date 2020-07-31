@@ -1,5 +1,9 @@
 # React PDF Viewer Component
 
+## 0.0.10
+
+- Polyfill intersection observer
+
 ## 0.0.9
 
 - Fix for IE

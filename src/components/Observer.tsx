@@ -1,4 +1,5 @@
 import * as React from 'react';
+require('intersection-observer');
 
 interface VisibilityChangedProps {
   isVisible: boolean;
