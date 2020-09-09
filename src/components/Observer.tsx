@@ -1,5 +1,5 @@
-import * as React from 'react';
 require('intersection-observer');
+import * as React from 'react';
 
 interface VisibilityChangedProps {
   isVisible: boolean;

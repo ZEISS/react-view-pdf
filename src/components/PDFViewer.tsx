@@ -243,6 +243,10 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
         height,
       };
       setPages([...pages]);
+      // On the first time we default the view to the first page
+      if (pageNumber === 1) {
+        zoomToPageView(pages[0], currentViewMode);
+      }
     }
   };
 
@@ -277,6 +281,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
    * @param scale
    */
   function zoomToScale(scale: number) {
+    console.log('[-] zoomToScale', scale);
     setCurrentScale(Math.min(Math.max(scale, 0.2), 2.5));
   }
 
@@ -290,6 +295,8 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
     if (!documentRef.current || !pageProps || !pageProps.ref) {
       return;
     }
+
+    console.log('[-] zoomToPageView', viewMode);
 
     const pageElement = pageProps.ref.firstChild as HTMLDivElement;
     const pageWidth = pageProps.width || pageElement.offsetWidth;
@@ -309,8 +316,6 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
       }
       case PageViewMode.FIT_TO_WIDTH: {
         const desiredWidth = Math.round(documentRef.current.offsetWidth * 0.95);
-        // eslint-disable-next-line no-debugger
-        debugger;
         zoomToScale(desiredWidth / pageWidth);
         break;
       }
