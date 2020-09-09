@@ -15,6 +15,10 @@ module.exports = {
 
   resolve: {
     extensions: ['.ts', '.js', '.tsx'],
+    alias: {
+      // Point to ES5 build
+      'pdfjs-dist': path.resolve('./node_modules/pdfjs-dist/es5/build/pdf.js'),
+    },
   },
 
   optimization: {
