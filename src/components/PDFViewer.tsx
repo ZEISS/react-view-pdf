@@ -277,7 +277,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
    * @param scale
    */
   function zoomToScale(scale: number) {
-    setCurrentScale(Math.min(Math.max(scale, 0.5), 2.5));
+    setCurrentScale(Math.min(Math.max(scale, 0.2), 2.5));
   }
 
   /**

@@ -1,5 +1,11 @@
 # React PDF Viewer Component
 
+## 0.0.11
+
+- Fix mobile rendering for landscape PDFs
+- Allow the user to scroll horizontally on mobile
+- Change the limits for zoom
+
 ## 0.0.10
 
 - Polyfill intersection observer

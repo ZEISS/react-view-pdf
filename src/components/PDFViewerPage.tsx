@@ -6,7 +6,7 @@ import { range } from '../utils/hacks';
 import Observer, { VisibilityChanged } from './Observer';
 
 const Page = styled.div`
-  margin-bottom: ${distance.xlarge};
+  margin: auto auto ${distance.xlarge};
   user-select: ${props => props.disableSelect && 'none'};
   display: block;
   background-color: ${themed(({ theme = {} }: StandardProps) => theme.ui1)};
