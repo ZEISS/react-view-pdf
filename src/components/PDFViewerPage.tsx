@@ -19,7 +19,7 @@ export interface PDFViewerPageProps {
   scale: number;
   disableSelect?: boolean;
   loaded: boolean;
-  onPageVisibilityChanged(pageIndex: number, ratio: number): void;
+  onPageVisibilityChanged(pageIndex: number, ratio: number): boolean;
   onPageLoaded(pageNumber: number, width: number, height: number): void;
 }
 
@@ -86,10 +86,10 @@ const PDFViewerPageInner: React.FC<PDFViewerPageProps> = props => {
 
   function visibilityChanged(params: VisibilityChanged) {
     const ratio = params.isVisible ? params.ratio : 0;
-    if (params.isVisible) {
+    const changed = onPageVisibilityChanged(pageNumber, ratio);
+    if (params.isVisible && changed) {
       debouncedLoad();
     }
-    onPageVisibilityChanged(pageNumber, ratio);
   }
 
   return (

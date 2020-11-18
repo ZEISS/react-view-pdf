@@ -92,6 +92,7 @@ export type ToolbarLabelProps = {
   enterFullscreen?: string;
   viewModeFitToWidth?: string;
   viewModeFitToHeight?: string;
+  viewModeDefault?: string;
   nextPage?: string;
   prevPage?: string;
   zoomIn?: string;
