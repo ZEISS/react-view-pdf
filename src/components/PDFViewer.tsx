@@ -120,6 +120,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
   const deviceAgent = navigator.userAgent.toLowerCase();
 
   const isTouchDevice =
+    true ||
     deviceAgent.match(/(iphone|ipod|ipad)/) ||
     deviceAgent.match(/(android)/) ||
     deviceAgent.match(/(iemobile)/) ||

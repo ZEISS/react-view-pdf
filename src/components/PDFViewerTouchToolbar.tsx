@@ -16,6 +16,7 @@ const Toolbar = styled.ul`
   list-style: none;
   margin: 0;
   position: relative;
+  align-items: center;
 
   opacity: 0.1;
   transition: opacity 100ms ease-in-out;
@@ -46,6 +47,7 @@ const ToolbarSeparator = styled.li`
   width: 1px;
   overflow: hidden;
   background-color: ${themed(({ theme = {} }: StandardProps) => theme.ui4)};
+  height: 25px;
 `;
 
 const ToolbarActionLink = styled(ActionLink)`
