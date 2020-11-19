@@ -1,5 +1,10 @@
 # React PDF Viewer Component
 
+## 0.1.0
+- Redesign for touch devices
+- Support touch gestures like pan, pinch to zoom, double tap for fullscreen and more
+- Fix things
+
 ## 0.0.11
 
 - Fix mobile rendering for landscape PDFs
