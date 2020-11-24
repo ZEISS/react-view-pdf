@@ -1,5 +1,11 @@
 # React PDF Viewer Component
 
+## 0.1.1
+- new layout 16:9 with a maximum height of 90vh (for mobile phones in ladnscape)
+- new toolbar behavior which is always on screen
+- Fixed missalignments on the toolbar
+- small visual fixes
+
 ## 0.1.0
 - Redesign for touch devices
 - Support touch gestures like pan, pinch to zoom, double tap for fullscreen and more
