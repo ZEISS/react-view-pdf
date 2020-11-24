@@ -3,10 +3,6 @@ import { ActionLink, distance, Icon, styled, themed, StandardProps, AnchorProps 
 import { PageViewMode } from '../types/Page';
 import { PDFViewerToolbarProps } from './PDFViewerToolbar';
 
-interface PDFViewerTouchToolbarProps extends PDFViewerToolbarProps {
-  showTouchToolbar: boolean;
-}
-
 const Toolbar = styled.ul`
   background-color: ${themed(({ theme = {} }: StandardProps) => theme.ui5)};
   color: ${themed(({ theme = {} }: StandardProps) => theme.text4)};
@@ -17,14 +13,7 @@ const Toolbar = styled.ul`
   margin: 0;
   position: relative;
   align-items: center;
-
-  opacity: 0.1;
-  transition: opacity 100ms ease-in-out;
-  ${({ showTouchToolbar }) =>
-    showTouchToolbar &&
-    `
-    opacity: 1;
-  `}
+  border-radius: 2px;
 `;
 
 const ToolbarWrapper = styled.div`
@@ -68,6 +57,19 @@ const ToolbarSelect = styled.select`
   color: ${themed(({ theme = {}, disabled }: StandardProps & AnchorProps) => (disabled ? theme.text3 : theme.text4))};
   font-size: 1rem;
   border: none;
+
+  &:after {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #f00;
+    position: absolute;
+    top: 40%;
+    right: 5px;
+    content: '';
+    z-index: 98;
+  }
 `;
 
 const defaultLabels = {
@@ -87,8 +89,8 @@ const defaultLabels = {
 /**
  * The `Document` is a wrapper to load PDFs and render all the pages
  */
-export const PDFViewerTouchToolbar: React.FC<PDFViewerTouchToolbarProps> = props => {
-  const { labels = defaultLabels, fullscreen, onFullscreenChange, currentPage, showTouchToolbar } = props;
+export const PDFViewerTouchToolbar: React.FC<PDFViewerToolbarProps> = props => {
+  const { labels = defaultLabels, fullscreen, onFullscreenChange, currentPage } = props;
 
   function onViewModeChange(viewMode: string) {
     switch (viewMode) {
@@ -106,7 +108,7 @@ export const PDFViewerTouchToolbar: React.FC<PDFViewerTouchToolbarProps> = props
 
   return (
     <ToolbarWrapper>
-      <Toolbar showTouchToolbar={showTouchToolbar}>
+      <Toolbar>
         <ToolbarItem>{labels.pagesOf(currentPage, props.numPages)}</ToolbarItem>
 
         <ToolbarSeparator />

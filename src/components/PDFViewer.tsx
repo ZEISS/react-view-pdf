@@ -16,11 +16,11 @@ const DocumentWrapper = styled.div`
   background-color: #fff;
   position: relative;
   width: 100%;
-  height: calc(56vw + 40px); // Compensate for the area we remove in the document
-  max-height: 100vh;
   // Thanks chrome for Android for not calculating the viewport size correctly depending
   // on whether you show or not the address bar. But no worries, we'll do it manually
-  max-height: calc(var(--vh, 1vh) * 100);
+  // We also set 2 times the padding-top for those browsers without var or min compatibility
+  padding-top: 56.25%;
+  padding-top: min(56.25%, calc(var(--vh, 1vh) * 90)); /* 16:9 Aspect Ratio */
   overflow: hidden;
 
   ${({ fullscreen }: FullscreenableElement) =>
@@ -115,7 +115,6 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
   const [currentViewMode, setCurrentViewMode] = React.useState<PageViewMode>(PageViewMode.DEFAULT);
   const [currentScale, setCurrentScale] = React.useState(1);
   const [fullscreen, setFullscreen] = React.useState(false);
-  const [showTouchToolbar, setShowTouchToolbar] = React.useState(false);
 
   const deviceAgent = navigator.userAgent.toLowerCase();
 
@@ -245,15 +244,6 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
     startDistance: 0,
   };
   const touchInfo = window['touchInfo'];
-
-  /**
-   * Event triggered when the user touches the screen
-   */
-  function onDocumentTouch() {
-    if (isTouchDevice) {
-      setShowTouchToolbar(!showTouchToolbar);
-    }
-  }
 
   /**
    * Event triggered on double touch
@@ -509,7 +499,6 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
           onTouchEnd={onDocumentTouchEnd}
           onTouchMove={onDocumentTouchMove}
           onTouchCancel={onTouchCancel}
-          onClick={onDocumentTouch}
           onDoubleClick={onDocumentDoubleTouch}>
           {loading ? (
             <PageWrapper>
@@ -564,7 +553,6 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
             onScaleChange={onScaleChange}
             onViewModeChange={onViewModeChange}
             onFullscreenChange={switchFullscreenMode}
-            showTouchToolbar={showTouchToolbar}
           />
         )}
       </DocumentWrapper>

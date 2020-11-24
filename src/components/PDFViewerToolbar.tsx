@@ -11,10 +11,10 @@ const Toolbar = styled.ul`
   flex-direction: row;
   list-style: none;
   margin: 0;
+  border-radius: 2px;
+  align-items: center;
 
   position: relative;
-  opacity: 0.1;
-  transition: opacity 0.5s 1s ease-in-out;
 `;
 
 const ToolbarWrapper = styled.div`
@@ -24,16 +24,18 @@ const ToolbarWrapper = styled.div`
   bottom: 0;
   display: flex;
   justify-content: center;
-
-  :hover ${Toolbar} {
-    transition: opacity 0.5s 0s ease-in-out;
-    opacity: 1;
-  }
 `;
 
 const ToolbarItem = styled.li`
   display: list-item;
   padding: ${distance.medium} ${distance.xxsmall};
+  height: 25px;
+  display: flex;
+  align-items: center;
+
+  & div {
+    display: flex;
+  }
 `;
 
 const ToolbarSeparator = styled.li`
@@ -41,6 +43,7 @@ const ToolbarSeparator = styled.li`
   width: 1px;
   overflow: hidden;
   background-color: ${themed(({ theme = {} }: StandardProps) => theme.ui4)};
+  height: 25px;
 `;
 
 const ToolbarTextField = styled.input`
