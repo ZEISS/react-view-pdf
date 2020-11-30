@@ -1,5 +1,9 @@
 # React PDF Viewer Component
 
+## 0.1.2
+- Add buttons for page navigation on mobile
+- Fix iOS select layout for the PDF sizing
+
 ## 0.1.1
 - new layout 16:9 with a maximum height of 90vh (for mobile phones in ladnscape)
 - new toolbar behavior which is always on screen

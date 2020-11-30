@@ -126,7 +126,8 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
     deviceAgent.match(/ipad/i) ||
     deviceAgent.match(/ipod/i) ||
     deviceAgent.match(/blackberry/i) ||
-    deviceAgent.match(/bada/i);
+    deviceAgent.match(/bada/i) ||
+    (deviceAgent.match(/Mac/) && navigator.maxTouchPoints && navigator.maxTouchPoints > 2); // iPad PRO, apple thinks it should behave like a desktop Safari, and so here we are...
 
   /**
    * Every time a new file is set we load the new document
