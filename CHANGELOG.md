@@ -1,5 +1,8 @@
 # React PDF Viewer Component
 
+## 0.1.4
+- Fix scaling issues
+
 ## 0.1.3
 - Update dependencies
 

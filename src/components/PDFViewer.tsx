@@ -140,7 +140,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
    * Effect to re-calculate page size and re-render after entering / exiting fullscreen
    */
   React.useEffect(() => {
-    zoomToPageView(pages[currentPage], currentViewMode);
+    zoomToPageView(pages[currentPage - 1], currentViewMode);
   }, [fullscreen]);
 
   /**
@@ -148,7 +148,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
    */
   React.useLayoutEffect(() => {
     const handleResize = debounce(() => {
-      zoomToPageView(pages[currentPage], currentViewMode);
+      zoomToPageView(pages[currentPage - 1], currentViewMode);
 
       // Fix chrome on Android address bar issue by setting the right viewport height with good old fashion JS
       // Then we set the value in the --vh custom property to the root of the document
@@ -446,28 +446,28 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
     }
 
     const pageElement = pageProps.ref.firstChild as HTMLDivElement;
-    const pageWidth = pageProps.width || pageElement.offsetWidth;
-    const pageHeight = pageProps.height || pageElement.offsetHeight;
+    const pageWidth = pageProps.width || pageElement.clientWidth;
+    const pageHeight = pageProps.height || pageElement.clientHeight;
     const landscape = pageWidth > pageHeight;
 
     switch (viewMode) {
       case PageViewMode.DEFAULT: {
         if (landscape) {
-          const desiredWidth = Math.round(documentRef.current.offsetWidth - 32);
+          const desiredWidth = Math.round(documentRef.current.clientWidth - 32);
           zoomToScale(desiredWidth / pageWidth);
         } else {
-          const desiredWidth = Math.round((documentRef.current.offsetWidth - 32) * 0.7);
+          const desiredWidth = Math.round((documentRef.current.clientWidth - 32) * 0.7);
           zoomToScale(desiredWidth / pageWidth);
         }
         break;
       }
       case PageViewMode.FIT_TO_WIDTH: {
-        const desiredWidth = Math.round(documentRef.current.offsetWidth - 32);
+        const desiredWidth = Math.round(documentRef.current.clientWidth - 32);
         zoomToScale(desiredWidth / pageWidth);
         break;
       }
       case PageViewMode.FIT_TO_HEIGHT: {
-        const desiredHeight = Math.round(documentRef.current.offsetHeight - 32);
+        const desiredHeight = Math.round(documentRef.current.clientHeight - 32);
         zoomToScale(desiredHeight / pageHeight);
         break;
       }
@@ -481,7 +481,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = props => {
    */
   function onViewModeChange(viewMode: PageViewMode) {
     setCurrentViewMode(viewMode);
-    zoomToPageView(pages[currentPage], viewMode);
+    zoomToPageView(pages[currentPage - 1], viewMode);
   }
 
   /**
