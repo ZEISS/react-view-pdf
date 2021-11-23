@@ -33,8 +33,8 @@ const PDFViewerPageInner: React.FC<PDFViewerPageProps> = props => {
   const canvasRef = React.createRef<HTMLCanvasElement>();
   const renderTask = React.useRef<PdfJs.PageRenderTask>();
 
-  const [debouncedLoad] = useDebouncedCallback(() => loadPage(), 100, { leading: true });
-  const [debouncedRender] = useDebouncedCallback(() => renderPage(), 100, { leading: true });
+  const debouncedLoad = useDebouncedCallback(() => loadPage(), 100, { leading: true });
+  const debouncedRender = useDebouncedCallback(() => renderPage(), 100, { leading: true });
 
   const intersectionThreshold = [...Array(10)].map((_, i) => i / 10);
 

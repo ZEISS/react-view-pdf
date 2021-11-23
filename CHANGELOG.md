@@ -1,6 +1,6 @@
 # React PDF Viewer Component
 
-## 0.1.5
+## 0.1.7
 - Bump dependencies
 
 ## 0.1.4
