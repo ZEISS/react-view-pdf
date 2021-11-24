@@ -17,6 +17,7 @@
     "pdf"
   ],
   "devDependencies": {
+    "@types/pdfjs-dist": "^2.10.377",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "eslint": "^8.3.0",
@@ -47,7 +48,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@types/pdfjs-dist": "^2.10.377",
     "intersection-observer": "^0.12.0",
     "pdfjs-dist": "^2.10.377",
     "use-debounce": "^7.0.1"

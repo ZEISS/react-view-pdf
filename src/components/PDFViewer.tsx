@@ -101,7 +101,7 @@ export interface PDFViewerProps {
 }
 
 // const defaultWorkerUrl = 'https://unpkg.com/pdfjs-dist@2.4.456/build/pdf.worker.min.js';
-const defaultWorkerUrl = 'https://unpkg.com/pdfjs-dist@2.4.456/es5/build/pdf.worker.js';
+const defaultWorkerUrl = 'https://unpkg.com/pdfjs-dist@2.10.377/legacy/build/pdf.worker.js';
 /**
  * The `Document` is a wrapper to load PDFs and render all the pages
  */
