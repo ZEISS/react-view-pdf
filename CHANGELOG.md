@@ -1,5 +1,8 @@
 # React PDF Viewer Component
 
+## 1.0.0
+- Releasing version 1.0.0 as the component is fully usable and stable.
+
 ## 0.1.7
 - Bump dependencies
 
